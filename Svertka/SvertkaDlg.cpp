@@ -163,7 +163,7 @@ BOOL CSvertkaDlg::OnInitDialog()
 	btnPause->EnableWindow(FALSE);
 	btnContinue->EnableWindow(FALSE);
 	
-	//поля
+	//эдиты
 	edtFirstName1 = reinterpret_cast<CEdit*>(GetDlgItem(IDC_EDIT1));
 	edtFirstName2 = reinterpret_cast<CEdit*>(GetDlgItem(IDC_EDIT2));
 	edtFirstName3 = reinterpret_cast<CEdit*>(GetDlgItem(IDC_EDIT3));
@@ -242,9 +242,8 @@ HCURSOR CSvertkaDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-//меняет ыидимость полей
-void CSvertkaDlg::SetEditFormat(BOOL form) {
-	
+//меняет видимость эдитов
+void CSvertkaDlg::SetEditFormat(BOOL form) {	
 	edtFirstName1->SetReadOnly(form);
 	edtFirstName2->SetReadOnly(form);
 	edtFirstName3->SetReadOnly(form);
@@ -264,15 +263,17 @@ void CSvertkaDlg::SetEditFormat(BOOL form) {
 	edtFirstName17->SetReadOnly(form);
 }
 
-//посчитать
+//деконволюция
 void CSvertkaDlg::OnBnClickedOk(){
 		SetEditFormat(TRUE);
 		btnCount->EnableWindow(FALSE);
 		btnPaint->EnableWindow(FALSE);
 		btnPause->EnableWindow(TRUE);
 		
+		//применение метода Хука Дживса
 		curSignal.MHJ(curSignal.N, curSignal.liambda, mPause, TAU, h, e);
 
+		//обработка сообщений
 		while (PeekMessage(&mPause, 0, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&mPause);
@@ -301,19 +302,24 @@ void CSvertkaDlg::OnBnClickedOk2()
 	btnCount->EnableWindow(TRUE);
 	btnPause->EnableWindow(FALSE);
 	btnContinue->EnableWindow(FALSE);
+
+	//флаг завершения работы алгоритма
 	ready = false;
 	
 	UpdateData(TRUE);
 
+	//ошибка деконволюции
 	e = 0.;
-
+	
 	curSignal.ClearSignal();
 	curSignal.FillSignal(N, fd, Ah, Gh,noise, A1, A2, A3, G1, G2, G3, niu1, niu2, niu3, &GR1);
 
+	//отрисовка сетки графиков
 	GR1.DrawW();
 	GR2.DrawW();
 	GR3.DrawW();
-		
+	
+	//нужно было добавить геттеры для векторов, а сами векторы сделать приватными, но они используются только тут, так что я не стал ничего менять
 	//исходный сигнал
 	GR1.DrawOne(curSignal.X, *min_element(curSignal.keys.begin(), curSignal.keys.end()), *max_element(curSignal.keys.begin(), curSignal.keys.end()),
 		*min_element(curSignal.X.begin(), curSignal.X.end()), *max_element(curSignal.X.begin(), curSignal.X.end()), 't', 'A', curSignal.keys);
